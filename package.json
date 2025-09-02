@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp -f _worker.js dist/_worker.js",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint .",
