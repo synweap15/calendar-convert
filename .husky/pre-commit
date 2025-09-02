@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Format with Prettier, then auto-fix ESLint issues repo-wide before commit
+npm run format
+npm run lint:fix
+
+# Restage any files updated by ESLint
+git add -A
