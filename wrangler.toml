@@ -8,3 +8,6 @@ assets = { directory = "dist", binding = "ASSETS" }
 [env.preview]
 name = "calendar-convert-preview"
 
+[[routes]]
+pattern = "availability.werda.pl"
+custom_domain = true
