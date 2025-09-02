@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cp -f _worker.js dist/_worker.js",
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint .",
