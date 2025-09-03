@@ -24,6 +24,7 @@ export default function App() {
   const [clearAllOpen1, setClearAllOpen1] = useState(false);
   const [clearAllOpen2, setClearAllOpen2] = useState(false);
   const [overlapOpen, setOverlapOpen] = useState(false);
+  const [rangeCapOpen, setRangeCapOpen] = useState(false);
   const [timeFormat, setTimeFormat] = useState('24');
 
   const mondayLocal = useMemo(() => {
@@ -34,6 +35,11 @@ export default function App() {
   }, [timezone]);
 
   function addRange(dayIndex, startSlot, endSlot) {
+    // Prevent exceeding encoded state capacity (u8 count => max 255 ranges)
+    if (availabilities.length >= 255) {
+      setRangeCapOpen(true);
+      return;
+    }
     const startMin = startSlot * 30;
     const endMin = (endSlot + 1) * 30;
     // compute local civil date for the chosen weekday in current tz
@@ -135,10 +141,13 @@ export default function App() {
   return (
     <div className="container">
       <div className="header" style={{ justifyContent: 'space-between' }}>
-        <h1 className="text-lg sm:text-xl font-semibold text-slate-900" style={{ margin: 0 }}>
+        <h1
+          className="text-base sm:text-xl font-semibold text-slate-900 flex-1 min-w-0"
+          style={{ margin: 0 }}
+        >
           Availability Calendar 📅
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
           <TimezoneSelect value={timezone} onChange={setTimezone} />
           <TimeFormatToggle value={timeFormat} onChange={setTimeFormat} />
           <button
@@ -175,7 +184,7 @@ export default function App() {
         {listView.length === 0 ? (
           <p className="badge">No availabilities yet. Click two cells to add.</p>
         ) : (
-          <ul>
+          <ul className="availability-list">
             {listView.map(({ id, start, end }) => {
               return (
                 <li key={id}>
@@ -208,6 +217,17 @@ export default function App() {
         cancelLabel={null}
         onConfirm={() => {
           setOverlapOpen(false);
+        }}
+      />
+      <ConfirmDialog
+        open={rangeCapOpen}
+        onOpenChange={setRangeCapOpen}
+        title="Range limit reached"
+        description="Range count is capped at 255. Please remove a range before adding another."
+        confirmLabel="OK"
+        cancelLabel={null}
+        onConfirm={() => {
+          setRangeCapOpen(false);
         }}
       />
       <ConfirmDialog
@@ -253,28 +273,6 @@ export default function App() {
           className="underline decoration-slate-300 hover:decoration-slate-500"
         >
           GitHub 🔗
-        </a>
-        .
-      </footer>
-
-      <footer className="mt-6 mb-4 text-slate-500 text-xs sm:text-sm">
-        © 2025{' '}
-        <a
-          href="https://dev.werda.pl"
-          target="_blank"
-          rel="noreferrer"
-          className="underline decoration-slate-300 hover:decoration-slate-500"
-        >
-          Paweł Werda
-        </a>
-        . Source on{' '}
-        <a
-          href="https://github.com/synweap15/calendar-convert"
-          target="_blank"
-          rel="noreferrer"
-          className="underline decoration-slate-300 hover:decoration-slate-500"
-        >
-          GitHub
         </a>
         .
       </footer>

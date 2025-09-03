@@ -2,7 +2,7 @@
 
 Tired of converting timezones when discussing availabilities? Here's a solution!
 
-A single‑view React app to define weekly availability in a selected timezone. The grid shows seven columns (Mon–Sun) with 30‑minute rows. Selections are stored in UTC and live‑convert to the chosen timezone. Mobile shows 1–3 days with horizontal scroll.
+A minimalistic React app to define weekly availability in a selected timezone. The grid shows seven columns (Mon–Sun) with 30‑minute rows. Selections are stored in UTC and live‑convert to the chosen timezone. Mobile shows 1–3 days with horizontal scroll.
 
 - Repo: https://github.com/synweap15/calendar-convert
 - Stack: React + Vite, Tailwind (bright theme), shadcn‑style utilities, ESLint + Prettier, Vitest
@@ -14,7 +14,7 @@ A single‑view React app to define weekly availability in a selected timezone. 
 - 12h/24h toggle; preview on hover while selecting
 - Shareable URL: `?state=` Base64‑URL compact state (timezone + ranges)
 - Custom modals for confirmations and alerts; accessible focus trap
-- Mobile friendly: horizontal scroll + Prev/Next controls
+- Mobile friendly: horizontal scroll
 
 ## Quick Start
 

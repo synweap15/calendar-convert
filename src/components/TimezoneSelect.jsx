@@ -8,7 +8,9 @@ export default function TimezoneSelect({ value, onChange }) {
   }, []);
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
+  const [panelTop, setPanelTop] = useState(0);
   const panelRef = useRef(null);
+  const btnRef = useRef(null);
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) {
@@ -45,18 +47,24 @@ export default function TimezoneSelect({ value, onChange }) {
       <button
         type="button"
         className={cn(
-          'inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-slate-50'
+          'inline-flex max-w-full items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-slate-50'
         )}
+        ref={btnRef}
         onClick={() => {
           setOpen((v) => {
-            return !v;
+            const next = !v;
+            if (next && btnRef.current) {
+              const rect = btnRef.current.getBoundingClientRect();
+              setPanelTop(Math.round(rect.bottom + window.scrollY));
+            }
+            return next;
           });
         }}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="text-slate-500">🌍 Timezone:</span>
-        <span className="font-medium">{value}</span>
+        <span className="text-slate-500 whitespace-nowrap">🌍 Timezone:</span>
+        <span className="font-medium truncate max-w-[60vw] sm:max-w-[240px]">{value}</span>
         <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
           {tzShort(value, new Date())}
         </span>
@@ -77,7 +85,8 @@ export default function TimezoneSelect({ value, onChange }) {
       {open && (
         <div
           ref={panelRef}
-          className="absolute right-0 z-20 mt-2 w-72 sm:w-80 rounded-md border border-slate-200 bg-white p-2 shadow-lg"
+          className="fixed sm:absolute z-50 sm:mt-2 left-0 sm:left-auto sm:right-0 w-screen sm:w-80 max-w-none sm:max-w-[calc(100vw-1rem)] rounded-none sm:rounded-md border border-slate-200 bg-white p-2 shadow-lg"
+          style={{ top: panelTop, right: 0 }}
         >
           <input
             autoFocus
@@ -88,7 +97,7 @@ export default function TimezoneSelect({ value, onChange }) {
               setQ(e.target.value);
             }}
           />
-          <div className="mt-2 max-h-60 overflow-auto">
+          <div className="mt-2 max-h-60 sm:max-h-80 overflow-auto">
             <ul role="listbox">
               {filtered.map((tz) => {
                 return (

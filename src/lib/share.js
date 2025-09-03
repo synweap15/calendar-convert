@@ -53,7 +53,8 @@ export function decodeState(s) {
     throw new Error('Unsupported state version');
   }
   const count = buf[o++];
-  if (count > 100) {
+  // Decoder now accepts up to 255 ranges (u8 max), matching encoder clamp
+  if (count > 255) {
     throw new Error('Too many ranges');
   }
   const ranges = [];

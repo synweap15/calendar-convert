@@ -49,75 +49,56 @@ export default function AvailabilityCalendar({
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-end gap-2 lg:hidden">
-        <button
-          type="button"
-          className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm hover:bg-slate-50"
-          onClick={() => {
-            scrollByDays(-1, wrapRef);
-          }}
-        >
-          Prev
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm hover:bg-slate-50"
-          onClick={() => {
-            scrollByDays(1, wrapRef);
-          }}
-        >
-          Next
-        </button>
-      </div>
-      <div className="calendar-wrap">
-        <div
-          ref={wrapRef}
-          className="calendar rounded-md"
-          role="grid"
-          aria-label="Weekly availability grid"
-        >
-          <div className="cell col-head sticky-left" />
-          {DAYS.map((d) => {
+      <div className="calendar-outer">
+        <div className="time-rail rounded-l-md" aria-hidden>
+          <div className="cell col-head" />
+          {halfHourSlots().map((slot) => {
+            const label = slot % 2 === 0 ? formatSlot(slot, timeFormat) : '';
             return (
-              <div key={d} className="cell col-head">
-                {d}
+              <div key={slot} className="cell row-head">
+                {label}
               </div>
             );
           })}
+        </div>
+        <div className="calendar-wrap">
+          <div
+            ref={wrapRef}
+            className="days-grid rounded-r-md"
+            role="grid"
+            aria-label="Weekly availability grid"
+          >
+            {DAYS.map((d) => {
+              return (
+                <div key={d} className="cell col-head">
+                  {d}
+                </div>
+              );
+            })}
 
-          {halfHourSlots().map((slot) => {
-            return (
-              <Row
-                key={slot}
-                slot={slot}
-                timezone={timezone}
-                timeFormat={timeFormat}
-                daySlotMap={daySlotMap}
-                pending={pending}
-                hoverSlot={hoverSlot}
-                onCellClick={onCellClick}
-                onCellHover={setHoverSlot}
-                onDeleteRange={onDeleteRange}
-              />
-            );
-          })}
+            {halfHourSlots().map((slot) => {
+              return (
+                <Row
+                  key={slot}
+                  slot={slot}
+                  timezone={timezone}
+                  timeFormat={timeFormat}
+                  daySlotMap={daySlotMap}
+                  pending={pending}
+                  hoverSlot={hoverSlot}
+                  onCellClick={onCellClick}
+                  onCellHover={setHoverSlot}
+                  onDeleteRange={onDeleteRange}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
       <p className="badge" style={{ marginTop: 12 }}>
         Rendering in timezone: <span className="accent">{timezone}</span> (
         {tzShort(timezone, new Date())})
       </p>
-      {pending && hoverSlot != null && (
-        <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm">
-          <span className="text-slate-500">Preview:</span>
-          <PreviewLabel
-            dayIndex={pending.dayIndex}
-            a={pending.slot}
-            b={hoverSlot}
-            abbr={tzShort(timezone, new Date())}
-          />
-        </div>
-      )}
 
       <ConfirmDialog
         open={confirmOpen}
@@ -165,10 +146,8 @@ function Row({
   onCellHover,
   onDeleteRange,
 }) {
-  const label = slot % 2 === 0 ? formatSlot(slot, timeFormat) : '';
   return (
     <>
-      <div className="cell row-head sticky-left">{label}</div>
       {DAYS.map((_, dayIndex) => {
         const active = daySlotMap[dayIndex]?.has(slot);
         const isPending = pending && pending.dayIndex === dayIndex && pending.slot === slot;
@@ -286,16 +265,6 @@ function formatSlot(slot, format = '24') {
   return format === '24'
     ? `${String(h).padStart(2, '0')}:00`
     : `${((h + 11) % 12) + 1}:00 ${h >= 12 ? 'PM' : 'AM'}`;
-}
-
-function PreviewLabel({ dayIndex, a, b, abbr }) {
-  const start = Math.min(a, b);
-  const end = Math.max(a, b) + 1; // inclusive slot range -> exclusive end
-  return (
-    <span>
-      {DAYS[dayIndex]} — {toLabelHM(start)}–{toLabelHM(end)} {abbr}
-    </span>
-  );
 }
 
 function findSegment(dayIndex, slot, daySlotMap) {

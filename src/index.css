@@ -31,28 +31,58 @@ body {
   @apply max-w-5xl mx-auto p-4;
 }
 .header {
-  @apply flex items-center justify-between gap-2 mb-3;
+  /* Allow wrapping on small screens to avoid overflow */
+  @apply flex flex-wrap items-start sm:items-center justify-between gap-2 mb-3;
 }
 
 .calendar-wrap {
   overflow-x: auto;
+  flex: 1 1 auto;
+  min-width: 0; /* allow grid to shrink in flex container */
 }
 
-.calendar {
+/* Two-pane layout: time rail + scrollable days grid */
+.calendar-outer {
+  display: flex;
+  gap: 0;
+}
+
+.time-rail {
+  flex: 0 0 var(--time-col, 64px);
   display: grid;
-  grid-template-columns: var(--time-col, 64px) repeat(7, var(--day-col, 240px));
+  grid-template-rows: var(--head-h) repeat(48, var(--slot-h));
   gap: 1px;
   background: #e2e8f0;
   border: 1px solid #e2e8f0;
+  border-right: none;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, var(--day-col, 240px));
+  grid-template-rows: var(--head-h) repeat(48, var(--slot-h));
+  gap: 1px;
+  background: #e2e8f0;
+  border: 1px solid #e2e8f0;
+  width: max-content;
 }
 .cell {
   @apply bg-white p-1 min-h-0;
 }
 .col-head {
   @apply font-semibold text-muted text-xs;
+  height: var(--head-h);
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
 }
 .row-head {
   @apply text-right text-muted text-[10px];
+  height: var(--slot-h);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
 }
 .badge {
   @apply bg-white border border-slate-200 px-2.5 py-1 rounded-md text-muted text-xs;
@@ -61,7 +91,8 @@ body {
   @apply text-accent;
 }
 .grid-btn {
-  @apply w-full h-5 bg-white cursor-pointer;
+  @apply w-full bg-white cursor-pointer;
+  height: var(--slot-h);
   border: none;
 }
 .grid-btn:hover {
@@ -128,6 +159,8 @@ body {
 /* Responsive day column width: show ~1/2/3 days per viewport on small screens */
 :root {
   --time-col: 56px;
+  --slot-h: 20px;
+  --head-h: 28px;
   --day-col: calc((100vw - var(--time-col) - 12px) / 1);
 }
 @media (min-width: 640px) {
@@ -142,15 +175,23 @@ body {
 }
 @media (min-width: 1024px) {
   /* On larger screens, fit all seven columns */
-  .calendar {
-    grid-template-columns: 64px repeat(7, minmax(0, 1fr));
+  .calendar-wrap {
+    overflow-x: visible;
+  }
+  .days-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    width: 100%;
   }
 }
 
 /* Sticky time column */
-.sticky-left {
-  position: sticky;
-  left: 0;
-  z-index: 20;
-  background: #ffffff;
+
+/* Faint separators for non-selected cells across all columns */
+.grid-btn {
+  box-shadow: inset 0 -1px 0 0 #e2e8f0;
+}
+
+/* Smaller listing text for better visual hierarchy vs grid */
+.availability-list {
+  @apply text-xs sm:text-sm leading-5;
 }
