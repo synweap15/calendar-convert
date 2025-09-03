@@ -168,7 +168,7 @@ function Row({
         const rangeLabel = seg
           ? `${toLabelHM(seg.startIdx, timeFormat)}–${toLabelHM(seg.endIdxExclusive, timeFormat)}`
           : '';
-        const showLabel = isStartOfBlock && !(seg && seg.endIdxExclusive === 48);
+        const showLabel = isStartOfBlock; // Always show label at block start, even if it ends at 48
         return (
           <button
             key={dayIndex + '_' + slot}
