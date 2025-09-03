@@ -14,12 +14,26 @@ import ConfirmDialog from './components/ui/ConfirmDialog.jsx';
 import TimeFormatToggle from './components/ui/TimeFormatToggle.jsx';
 
 const DEFAULT_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+function readSenderTimezoneFromURL() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get('state');
+    if (!s) {
+      return null;
+    }
+    const decoded = decodeState(s);
+    return decoded.timezone || null;
+  } catch {
+    return null;
+  }
+}
 
 let idCounter = 1;
 
 export default function App() {
   const [timezone, setTimezone] = useState(DEFAULT_TZ);
   const [availabilities, setAvailabilities] = useState([]); // {id, startUtc, endUtc}
+  const [senderTimezone, setSenderTimezone] = useState(readSenderTimezoneFromURL());
   const [invalidStateOpen, setInvalidStateOpen] = useState(false);
   const [clearAllOpen1, setClearAllOpen1] = useState(false);
   const [clearAllOpen2, setClearAllOpen2] = useState(false);
@@ -104,16 +118,14 @@ export default function App() {
     return ((days % 7) + 7) % 7;
   }
 
-  // Load state from URL on first mount
+  // Load state from URL on first mount; set a hydration flag to avoid overwriting URL too early
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const s = params.get('state');
       if (s) {
         const decoded = decodeState(s);
-        if (decoded.timezone) {
-          setTimezone(decoded.timezone);
-        }
         if (Array.isArray(decoded.ranges)) {
           setAvailabilities(
             decoded.ranges.map((r) => {
@@ -124,11 +136,16 @@ export default function App() {
       }
     } catch (e) {
       setInvalidStateOpen(true);
+    } finally {
+      setHydrated(true);
     }
   }, []);
 
   // Update shareable URL on state change
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
     const minimal = availabilities.map((r) => {
       return { startUtc: r.startUtc, endUtc: r.endUtc };
     });
@@ -136,7 +153,7 @@ export default function App() {
     const url = new URL(window.location.href);
     url.searchParams.set('state', s);
     window.history.replaceState(null, '', url.toString());
-  }, [timezone, availabilities]);
+  }, [timezone, availabilities, hydrated]);
 
   return (
     <div className="container">
@@ -148,7 +165,7 @@ export default function App() {
           Availability Calendar 📅
         </h1>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          <TimezoneSelect value={timezone} onChange={setTimezone} />
+          <TimezoneSelect value={timezone} onChange={setTimezone} senderTimezone={senderTimezone} />
           <TimeFormatToggle value={timeFormat} onChange={setTimeFormat} />
           <button
             type="button"

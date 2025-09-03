@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { supportedTimeZones, tzShort } from '../lib/time.js';
 import { cn } from '../lib/utils.js';
 
-export default function TimezoneSelect({ value, onChange }) {
+export default function TimezoneSelect({ value, onChange, senderTimezone = null }) {
   const all = useMemo(() => {
     return supportedTimeZones();
   }, []);
@@ -21,6 +21,44 @@ export default function TimezoneSelect({ value, onChange }) {
       return tz.toLowerCase().includes(term);
     });
   }, [q, all]);
+
+  const detectedTz = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    } catch {
+      return 'UTC';
+    }
+  }, []);
+
+  const displayList = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    const out = [];
+    const pushUnique = (tz) => {
+      if (!tz) {
+        return;
+      }
+      if (out.includes(tz)) {
+        return;
+      }
+      out.push(tz);
+    };
+    const matchesFilter = (tz) => {
+      return !term || tz.toLowerCase().includes(term);
+    };
+    // Put detected timezone first if it matches the filter (or no filter)
+    if (matchesFilter(detectedTz)) {
+      pushUnique(detectedTz);
+    }
+    // Then sender timezone if present, different, and matches filter
+    if (senderTimezone && senderTimezone !== detectedTz && matchesFilter(senderTimezone)) {
+      pushUnique(senderTimezone);
+    }
+    // Then the filtered list
+    for (const tz of filtered) {
+      pushUnique(tz);
+    }
+    return out;
+  }, [filtered, detectedTz, senderTimezone, q]);
 
   // Ensure current value remains selectable if it falls out of filter
   useEffect(() => {
@@ -100,7 +138,7 @@ export default function TimezoneSelect({ value, onChange }) {
           />
           <div className="mt-2 max-h-60 sm:max-h-80 overflow-auto">
             <ul role="listbox">
-              {filtered.map((tz) => {
+              {displayList.map((tz) => {
                 return (
                   <li key={tz}>
                     <button
@@ -116,7 +154,21 @@ export default function TimezoneSelect({ value, onChange }) {
                       role="option"
                       aria-selected={tz === value}
                     >
-                      {tz}
+                      <span className="inline-flex items-center gap-2">
+                        <span className="truncate max-w-[80vw] sm:max-w-[240px]">{tz}</span>
+                        {tz === detectedTz ? (
+                          <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-600">
+                            Your timezone
+                          </span>
+                        ) : null}
+                        {senderTimezone &&
+                        tz === senderTimezone &&
+                        senderTimezone !== detectedTz ? (
+                          <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-600">
+                            Sender timezone
+                          </span>
+                        ) : null}
+                      </span>
                     </button>
                   </li>
                 );
@@ -132,4 +184,5 @@ export default function TimezoneSelect({ value, onChange }) {
 TimezoneSelect.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  senderTimezone: PropTypes.string,
 };
