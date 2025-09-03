@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from './Button.jsx';
 
 export default function TimeFormatToggle({ value, onChange }) {
@@ -25,3 +26,8 @@ export default function TimeFormatToggle({ value, onChange }) {
     </div>
   );
 }
+
+TimeFormatToggle.propTypes = {
+  value: PropTypes.oneOf(['24', '12']).isRequired,
+  onChange: PropTypes.func.isRequired,
+};

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { supportedTimeZones, tzShort } from '../lib/time.js';
 import { cn } from '../lib/utils.js';
 
@@ -127,3 +128,8 @@ export default function TimezoneSelect({ value, onChange }) {
     </div>
   );
 }
+
+TimezoneSelect.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};

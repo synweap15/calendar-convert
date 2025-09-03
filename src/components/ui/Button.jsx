@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { cn } from '../../lib/utils.js';
 
 export default function Button({ as = 'button', className, variant = 'default', ...props }) {
@@ -12,3 +13,9 @@ export default function Button({ as = 'button', className, variant = 'default', 
   };
   return <Comp className={cn(base, variants[variant], className)} {...props} />;
 }
+
+Button.propTypes = {
+  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'outline', 'ghost']),
+};

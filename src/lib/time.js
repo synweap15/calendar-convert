@@ -78,16 +78,7 @@ export function utcToLocalParts(dateUtc, tz) {
   return fmtParts(dateUtc, tz);
 }
 
-export function pad2(n) {
-  return String(n).padStart(2, '0');
-}
-export function labelHM(h, m) {
-  return `${pad2(h)}:${pad2(m)}`;
-}
-
-export function minutesOfDay(h, m) {
-  return h * 60 + m;
-}
+// removed unused pad2/labelHM/minutesOfDay helpers
 
 export function dayIndexFromParts(parts, tz) {
   // Calculate day index relative to REF_MONDAY_UTC when seen in the same timezone
@@ -144,12 +135,4 @@ export function tzShort(tz, dateUtc = new Date()) {
   }
 }
 
-export function formatTime(h, m, mode = '24') {
-  if (mode === '24') {
-    return `${pad2(h)}:${pad2(m)}`;
-  }
-  const isPM = h >= 12;
-  const hh12 = ((h + 11) % 12) + 1;
-  const mm = pad2(m);
-  return `${hh12}:${mm} ${isPM ? 'PM' : 'AM'}`;
-}
+// removed unused formatTime

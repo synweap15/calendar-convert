@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   DAYS,
   halfHourSlots,
@@ -89,6 +90,10 @@ export default function AvailabilityCalendar({
                   onCellClick={onCellClick}
                   onCellHover={setHoverSlot}
                   onDeleteRange={onDeleteRange}
+                  onRequestDelete={(id) => {
+                    setDeleteId(id);
+                    setConfirmOpen(true);
+                  }}
                 />
               );
             })}
@@ -118,22 +123,19 @@ export default function AvailabilityCalendar({
   );
 }
 
-function scrollByDays(delta, wrapRef) {
-  const el = wrapRef.current;
-  if (!el) {
-    return;
-  }
-  const styles = getComputedStyle(document.documentElement);
-  const dayCol = styles.getPropertyValue('--day-col').trim();
-  let step = el.clientWidth / 2;
-  if (dayCol.endsWith('px')) {
-    const n = parseFloat(dayCol);
-    if (!Number.isNaN(n)) {
-      step = n;
-    }
-  }
-  el.scrollBy({ left: delta * step, behavior: 'smooth' });
-}
+AvailabilityCalendar.propTypes = {
+  timezone: PropTypes.string.isRequired,
+  timeFormat: PropTypes.oneOf(['24', '12']),
+  ranges: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      startUtc: PropTypes.number.isRequired,
+      endUtc: PropTypes.number.isRequired,
+    })
+  ).isRequired,
+  onAddRange: PropTypes.func.isRequired,
+  onDeleteRange: PropTypes.func.isRequired,
+};
 
 function Row({
   slot,
@@ -145,6 +147,7 @@ function Row({
   onCellClick,
   onCellHover,
   onDeleteRange,
+  onRequestDelete,
 }) {
   return (
     <>
@@ -189,7 +192,11 @@ function Row({
                     className="delete-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteRange(seg.id);
+                      if (onRequestDelete) {
+                        onRequestDelete(seg.id);
+                      } else {
+                        onDeleteRange(seg.id);
+                      }
                     }}
                   >
                     ×
@@ -203,6 +210,19 @@ function Row({
     </>
   );
 }
+
+Row.propTypes = {
+  slot: PropTypes.number.isRequired,
+  timezone: PropTypes.string.isRequired,
+  timeFormat: PropTypes.oneOf(['24', '12']).isRequired,
+  daySlotMap: PropTypes.arrayOf(PropTypes.instanceOf(Set)).isRequired,
+  pending: PropTypes.shape({ dayIndex: PropTypes.number, slot: PropTypes.number }),
+  hoverSlot: PropTypes.number,
+  onCellClick: PropTypes.func.isRequired,
+  onCellHover: PropTypes.func.isRequired,
+  onDeleteRange: PropTypes.func.isRequired,
+  onRequestDelete: PropTypes.func,
+};
 
 function buildDaySlotMap(ranges, tz) {
   const map = Array.from({ length: 7 }, () => {
