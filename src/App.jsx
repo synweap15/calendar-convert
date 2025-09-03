@@ -40,6 +40,7 @@ export default function App() {
   const [overlapOpen, setOverlapOpen] = useState(false);
   const [rangeCapOpen, setRangeCapOpen] = useState(false);
   const [timeFormat, setTimeFormat] = useState('24');
+  const [copied, setCopied] = useState(false);
 
   const mondayLocal = useMemo(() => {
     return utcToLocalParts(new Date(REF_MONDAY_UTC), timezone);
@@ -158,12 +159,43 @@ export default function App() {
   return (
     <div className="container">
       <div className="header" style={{ justifyContent: 'space-between' }}>
-        <h1
-          className="text-base sm:text-xl font-semibold text-slate-900 flex-1 min-w-0"
-          style={{ margin: 0 }}
-        >
-          Availability Calendar 📅
-        </h1>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h1 className="text-base sm:text-xl font-semibold text-slate-900" style={{ margin: 0 }}>
+            Availability Calendar 📅
+          </h1>
+          <button
+            type="button"
+            className={`${copied ? 'share-btn copied' : 'share-btn'}`}
+            onClick={async () => {
+              try {
+                const url = window.location.href;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  await navigator.clipboard.writeText(url);
+                } else {
+                  const ta = document.createElement('textarea');
+                  ta.value = url;
+                  ta.setAttribute('readonly', '');
+                  ta.style.position = 'absolute';
+                  ta.style.left = '-9999px';
+                  document.body.appendChild(ta);
+                  ta.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(ta);
+                }
+                setCopied(true);
+                setTimeout(() => {
+                  setCopied(false);
+                }, 1200);
+              } catch {
+                // ignore
+              }
+            }}
+            title="Copy shareable link"
+            aria-label="Copy shareable link"
+          >
+            {copied ? '✔ Copied' : '🔗 Share'}
+          </button>
+        </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
           <TimezoneSelect value={timezone} onChange={setTimezone} senderTimezone={senderTimezone} />
           <TimeFormatToggle value={timeFormat} onChange={setTimeFormat} />

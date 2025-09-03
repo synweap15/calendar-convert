@@ -214,3 +214,27 @@ body {
 .availability-list {
   @apply text-xs sm:text-sm leading-5;
 }
+
+/* Share button + animation */
+.share-btn {
+  @apply inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-slate-50;
+  transition:
+    transform 120ms ease-out,
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+.share-btn.copied {
+  @apply bg-accent text-white border-accent;
+  animation: bump 220ms ease-out;
+}
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
